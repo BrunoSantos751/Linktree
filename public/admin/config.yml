@@ -14,7 +14,7 @@ collections:
         file: "src/content/settings.json" 
         format: "json"
         fields:
-         - { label: "Avatar", name: "avatar", widget: "image" }
+          - { label: "Avatar", name: "avatar", widget: "image" }
           - { label: "Título do Site", name: "title", widget: "string" }
           - { label: "Descrição (SEO)", name: "description", widget: "string" }
           - { label: "Cor de Fundo", name: "backgroundColor", widget: "color" }
@@ -29,7 +29,7 @@ collections:
     extension: "json"  
     format: "json"     
     fields:
-     - { label: "Icon", name: "icon", widget: "image" }
+      - { label: "Icon", name: "icon", widget: "image" }
       - { label: "Ordem", name: "order", widget: "number" }
       - { label: "Título do Botão", name: "title", widget: "string" }
       - { label: "URL", name: "url", widget: "string" }
