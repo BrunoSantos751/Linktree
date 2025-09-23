@@ -1,17 +1,41 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Administração do Conteúdo</title>
-  </head>
-  <body>
-    <script>
-      window.CMS_CONFIG = {
-        "config_path": "/admin/config.json"
-      }
-    </script>
-    
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js" defer></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste de Administração do CMS</title>
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    var config = {
+      // INÍCIO DA CONFIGURAÇÃO DE TESTE
+      "backend": {
+        "name": "github",
+        "repo": "BrunoSantos751/Linktree", // <-- SUBSTITUA AQUI
+        "branch": "main"                     // <-- SUBSTITUA AQUI (se for 'master')
+      },
+      "media_folder": "public/images",
+      "collections": [
+        {
+          "name": "teste",
+          "label": "Coleção de Teste",
+          "files": [
+            {
+              "label": "Página de Teste",
+              "name": "pagina_teste",
+              "file": "src/content/test.json",
+              "fields": [
+                { "label": "Título", "name": "title", "widget": "string" }
+              ]
+            }
+          ]
+        }
+      ]
+      // FIM DA CONFIGURAÇÃO DE TESTE
+    };
+
+    CMS.init({ config });
+  </script>
+</body>
 </html>
