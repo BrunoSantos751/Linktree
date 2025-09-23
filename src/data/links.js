@@ -6,7 +6,7 @@ export const socialLinks = [
   },
   {
     title: 'LinkedIn',
-    url: 'www.linkedin.com/in/bruno-santos-moraes-943091253',
+    url: 'https://www.linkedin.com/in/bruno-santos-moraes-943091253',
   },
   {
     title: 'GitHub',
