@@ -2,11 +2,16 @@
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
 
-// Importa todos os arquivos .json da pasta de links
-const allLinkFiles = await Astro.glob('../content/links/*.json');
+// 1. Usar import.meta.glob, que é a forma moderna e não quebra se a pasta estiver vazia.
+// O 'eager: true' faz com que o conteúdo dos arquivos seja importado imediatamente.
+const allLinkFiles = await import.meta.glob('../content/links/*.json', { eager: true });
 
-// Remove qualquer arquivo que não tenha um número de ordem e ordena o resto
-const sortedLinks = allLinkFiles
+// 2. Transformar o objeto retornado em um array de links.
+// Object.values pega apenas os conteúdos dos arquivos importados.
+const allLinks = Object.values(allLinkFiles);
+
+// 3. A lógica de ordenação e filtro continua a mesma.
+const sortedLinks = allLinks
   .filter(link => typeof link.order === 'number')
   .sort((a, b) => a.order - b.order);
 ---
