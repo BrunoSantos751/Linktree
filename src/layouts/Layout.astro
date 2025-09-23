@@ -1,63 +1,67 @@
 ---
-import settings from '../content/settings.json';
+import { client } from '../lib/sanity';
 
 let title = "Meus Links";
 let description = "Meus links em um só lugar";
 let backgroundColor = "#13151a";
 let highlightColor = "#0077b6";
 
+// Buscar configurações do Sanity
+const settings = await client.fetch(`*[_type == "settings"][0]{
+  title, description, backgroundColor, highlightColor
+}`);
+
 if (settings) {
-  title = settings.title;
-  description = settings.description;
-  backgroundColor = settings.backgroundColor;
-  highlightColor = settings.highlightColor;
+  title = settings.title || title;
+  description = settings.description || description;
+  backgroundColor = settings.backgroundColor || backgroundColor;
+  highlightColor = settings.highlightColor || highlightColor;
 }
 ---
 <!doctype html>
 <html lang="pt-br">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
 
-		<title>{title}</title>
+    <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-
-	</head>
-	<body>
-		<slot />
-	</body>
+  </head>
+  <body>
+    <slot />
+  </body>
 </html>
+
 <style is:global define:vars={{ backgroundColor, highlightColor }}>
-	/* --- CSS RESET --- */
-	*,
-	*::before,
-	*::after {
-		box-sizing: border-box; /* A regra de ouro que resolve o problema */
-	}
+  /* --- CSS RESET --- */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-	html {
-		font-family: system-ui, sans-serif;
-		background-color: var(--backgroundColor);
-	}
+  html {
+    font-family: system-ui, sans-serif;
+    background-color: var(--backgroundColor);
+  }
 
-	body {
-		margin: 0;
-		/* Usamos display grid para uma centralização ainda mais robusta */
-		display: grid;
-		place-content: center; /* Centraliza tudo (horizontal e vertical) */
-		min-height: 100vh;
-	}
-	/* --- FIM DO RESET --- */
+  body {
+    margin: 0;
+    display: grid;
+    place-content: center; /* Centraliza horizontal e vertical */
+    min-height: 100vh;
+  }
+  /* --- FIM DO RESET --- */
 
-	.is-highlighted {
-		background-color: var(--highlightColor) !important;
-		font-weight: bold;
-	}
-	.is-highlighted:hover {
-		filter: brightness(1.1);
-	}
+  .is-highlighted {
+    background-color: var(--highlightColor) !important;
+    font-weight: bold;
+  }
+  .is-highlighted:hover {
+    filter: brightness(1.1);
+  }
 </style>
