@@ -2,5 +2,6 @@
   "title": "Linktree",
   "description": "Uma pagina simples com todos os seus links",
   "backgroundColor": "#13151a",
-  "highlightColor": "#0077b6"
+  "highlightColor": "#0077b6",
+  "avatar": "/assets/images/avatar.jpg"
 }
