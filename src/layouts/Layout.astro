@@ -1,11 +1,10 @@
 ---
-interface Props {
-	title: string;
-}
+import settings from '../content/settings.json'; 
 
-const { title } = Astro.props;
-const description = "Todos os meus links importantes em um só lugar.";
+const { title, description, backgroundColor, highlightColor } = settings;
 ---
+<style is:global define:vars={{ backgroundColor, highlightColor }}>
+</style>
 
 <!doctype html>
 <html lang="pt-br">

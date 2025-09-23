@@ -1,16 +1,21 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
-import { socialLinks } from '../data/links.js';
+
+// Astro.glob() é uma função poderosa para importar múltiplos arquivos
+const allLinks = await Astro.glob('../content/links/*.json');
+
+// O CMS não garante a ordem, então usamos nosso campo 'order' para organizar
+const sortedLinks = allLinks.sort((a, b) => a.order - b.order);
 ---
 
-<Layout title="Meus Links | Bruno Moraes">
-	<main>
+<Layout>
+  <main>
     <img src="/avatar.png" alt="Foto de perfil" class="avatar">
-		<h1>@BrunoMoraes</h1>
+    <h1>@SeuNome</h1>
 
     <div class="links-container">
-      {socialLinks.map(link => (
+      {sortedLinks.map(link => (
         <LinkButton 
           href={link.url}
           title={link.title}
@@ -18,7 +23,7 @@ import { socialLinks } from '../data/links.js';
         />
       ))}
     </div>
-	</main>
+  </main>
 </Layout>
 
 <style>
