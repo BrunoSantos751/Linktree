@@ -25,6 +25,8 @@ collections:
     folder: "src/content/links" 
     create: true 
     slug: "{{title}}" 
+    extension: "json"  
+    format: "json"     
     fields:
       - { label: "Ordem", name: "order", widget: "number" }
       - { label: "Título do Botão", name: "title", widget: "string" }
