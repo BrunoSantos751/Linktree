@@ -1,8 +1,9 @@
 backend:
   name: github
-  repo: "BrunoSantos751/Linktree" # <-- SUBSTITUA AQUI
+  repo: "BrunoSantos751/Linktree" 
   branch: "main"
-  base_url: https://linktree-214.pages.dev/                     # <-- SUBSTITUA AQUI (ou "master")
+  base_url: https://linktree-214.pages.dev/    
+  auth_endpoint: api/auth                  
 
 media_folder: "public/images"
 public_folder: "/images"
