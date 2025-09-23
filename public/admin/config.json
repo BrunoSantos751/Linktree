@@ -1,7 +1,7 @@
 {
   "backend": {
     "name": "github",
-    "repo": "seu-usuario/seu-repo",
+    "repo": "BrunoSantos751/Linktree",
     "branch": "main"
   },
   "media_folder": "public/images",
