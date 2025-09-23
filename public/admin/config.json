@@ -1,0 +1,6 @@
+{
+  "backend": {
+    "name": "github",
+    "repo": "seu-usuario/seu-repo"
+  }
+}
