@@ -1,0 +1,45 @@
+---
+const { href, title, highlight = false } = Astro.props;
+---
+<a 
+  href={href} 
+  target="_blank" 
+  rel="noopener noreferrer"
+  class:list={[
+    "link-button",
+    { "is-highlighted": highlight }
+  ]}
+>
+  {title}
+</a>
+
+<style>
+  .link-button {
+    display: block;
+    background-color: #333;
+    color: white;
+    text-decoration: none;
+    padding: 1rem;
+    margin: 0.75rem auto;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+
+  .link-button:hover {
+    transform: scale(1.05);
+    background-color: #555;
+  }
+
+  .is-highlighted {
+    background-color: #0077b6; 
+    font-weight: bold;
+  }
+
+  .is-highlighted:hover {
+    background-color: #0288d1;
+  }
+</style>
