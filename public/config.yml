@@ -3,7 +3,7 @@ backend:
   repo: "BrunoSantos751/Linktree" 
   branch: "main"
   base_url: https://linktree-214.pages.dev/    
-  auth_endpoint: api/auth                  
+  auth_endpoint: functions/api/auth
 
 media_folder: "public/images"
 public_folder: "/images"
