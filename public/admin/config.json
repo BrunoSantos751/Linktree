@@ -1,7 +1,8 @@
 {
   "backend": {
     "name": "github",
-    "repo": "seu-usuario/seu-repo"
+    "repo": "seu-usuario/seu-repo",
+    "branch": "main"
   },
   "media_folder": "public/images",
   "public_folder": "/images",
