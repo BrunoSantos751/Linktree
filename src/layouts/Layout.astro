@@ -1,7 +1,6 @@
 ---
 import settings from '../content/settings.json';
 
-// Usamos um bloco try...catch para evitar erro no primeiro build se o arquivo não existir
 let title = "Meus Links";
 let description = "Meus links em um só lugar";
 let backgroundColor = "#13151a";
@@ -26,6 +25,9 @@ if (settings) {
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+
+    <script is:inline src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
 	</head>
 	<body>
 		<slot />
@@ -39,7 +41,6 @@ if (settings) {
 	body {
 		margin: 0;
 	}
-  /* Estilo global para o botão destacado, lendo a cor da config */
 	.is-highlighted {
     background-color: var(--highlightColor) !important;
     font-weight: bold;
