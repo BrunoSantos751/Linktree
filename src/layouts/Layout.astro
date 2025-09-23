@@ -34,18 +34,32 @@ if (settings) {
 	</body>
 </html>
 <style is:global define:vars={{ backgroundColor, highlightColor }}>
+	/* --- CSS RESET --- */
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box; /* A regra de ouro que resolve o problema */
+	}
+
 	html {
 		font-family: system-ui, sans-serif;
 		background-color: var(--backgroundColor);
 	}
+
 	body {
 		margin: 0;
+		/* Usamos display grid para uma centralização ainda mais robusta */
+		display: grid;
+		place-content: center; /* Centraliza tudo (horizontal e vertical) */
+		min-height: 100vh;
 	}
+	/* --- FIM DO RESET --- */
+
 	.is-highlighted {
-    background-color: var(--highlightColor) !important;
-    font-weight: bold;
-  }
-  .is-highlighted:hover {
-    filter: brightness(1.1);
-  }
+		background-color: var(--highlightColor) !important;
+		font-weight: bold;
+	}
+	.is-highlighted:hover {
+		filter: brightness(1.1);
+	}
 </style>
