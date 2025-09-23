@@ -34,12 +34,8 @@ const { href, title, highlight = false } = Astro.props;
     background-color: #555;
   }
 
-  .is-highlighted {
-    background-color: #0077b6; 
-    font-weight: bold;
-  }
-
+  /* A cor específica do .is-highlighted agora vem do Layout.astro */
   .is-highlighted:hover {
-    background-color: #0288d1;
+    background-color: #0288d1; /* Pode remover ou manter como fallback */
   }
 </style>

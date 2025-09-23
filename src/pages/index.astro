@@ -2,17 +2,19 @@
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
 
-// Astro.glob() é uma função poderosa para importar múltiplos arquivos
-const allLinks = await Astro.glob('../content/links/*.json');
+// Importa todos os arquivos .json da pasta de links
+const allLinkFiles = await Astro.glob('../content/links/*.json');
 
-// O CMS não garante a ordem, então usamos nosso campo 'order' para organizar
-const sortedLinks = allLinks.sort((a, b) => a.order - b.order);
+// Remove qualquer arquivo que não tenha um número de ordem e ordena o resto
+const sortedLinks = allLinkFiles
+  .filter(link => typeof link.order === 'number')
+  .sort((a, b) => a.order - b.order);
 ---
 
 <Layout>
-  <main>
+	<main>
     <img src="/avatar.png" alt="Foto de perfil" class="avatar">
-    <h1>@SeuNome</h1>
+		<h1>@SeuNome</h1>
 
     <div class="links-container">
       {sortedLinks.map(link => (
@@ -23,7 +25,7 @@ const sortedLinks = allLinks.sort((a, b) => a.order - b.order);
         />
       ))}
     </div>
-  </main>
+	</main>
 </Layout>
 
 <style>

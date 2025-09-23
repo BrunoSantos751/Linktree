@@ -1,11 +1,19 @@
 ---
-import settings from '../content/settings.json'; 
+import settings from '../content/settings.json';
 
-const { title, description, backgroundColor, highlightColor } = settings;
+// Usamos um bloco try...catch para evitar erro no primeiro build se o arquivo não existir
+let title = "Meus Links";
+let description = "Meus links em um só lugar";
+let backgroundColor = "#13151a";
+let highlightColor = "#0077b6";
+
+if (settings) {
+  title = settings.title;
+  description = settings.description;
+  backgroundColor = settings.backgroundColor;
+  highlightColor = settings.highlightColor;
+}
 ---
-<style is:global define:vars={{ backgroundColor, highlightColor }}>
-</style>
-
 <!doctype html>
 <html lang="pt-br">
 	<head>
@@ -14,34 +22,29 @@ const { title, description, backgroundColor, highlightColor } = settings;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 
-    <title>{title}</title>
+		<title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    </head>
+	</head>
 	<body>
 		<slot />
 	</body>
 </html>
-<style is:global>
-	:root {
-		--accent: 136, 58, 234;
-		--accent-light: 224, 204, 250;
-		--accent-dark: 49, 10, 101;
-		--accent-gradient: linear-gradient(
-			45deg,
-			rgb(var(--accent)),
-			rgb(var(--accent-light)) 30%,
-			white 60%
-		);
-	}
+<style is:global define:vars={{ backgroundColor, highlightColor }}>
 	html {
 		font-family: system-ui, sans-serif;
-		background: #13151a;
-		background-size: 224px;
+		background-color: var(--backgroundColor);
 	}
 	body {
 		margin: 0;
 	}
+  /* Estilo global para o botão destacado, lendo a cor da config */
+	.is-highlighted {
+    background-color: var(--highlightColor) !important;
+    font-weight: bold;
+  }
+  .is-highlighted:hover {
+    filter: brightness(1.1);
+  }
 </style>
