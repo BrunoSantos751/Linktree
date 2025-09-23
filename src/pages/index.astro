@@ -1,23 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
-import settings from '../content/settings.json'; 
-import { Image } from 'astro:assets'; 
+import settings from '../content/settings.json';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro:assets';
+
+
+const allImages = await import.meta.glob<{ default: ImageMetadata }>('../assets/images/*');
+
+const avatarPathFromCMS = settings.avatar;
+
+let avatarImage;
+if (avatarPathFromCMS) {
+  const normalizedPath = '../' + avatarPathFromCMS.substring(4);
+
+  if (allImages[normalizedPath]) {
+    const imageModule = await allImages[normalizedPath]();
+    avatarImage = imageModule.default;
+  }
+}
 
 const allLinkFiles = await import.meta.glob('../content/links/*.json', { eager: true });
 const allLinks = Object.values(allLinkFiles);
 const sortedLinks = allLinks
   .filter(link => typeof link.order === 'number')
   .sort((a, b) => a.order - b.order);
-
-const avatarPath = settings.avatar;
 ---
 
 <Layout>
 	<main>
-    {avatarPath && (
+    {avatarImage && (
       <Image 
-        src={import(/* @vite-ignore */ `../assets/images/${avatarPath.split('/').pop()}`)}
+        src={avatarImage}
         alt="Foto de perfil" 
         width={120} 
         height={120} 
@@ -25,7 +39,7 @@ const avatarPath = settings.avatar;
       />
     )}
 		
-		<h1>@Brunosantos751</h1>
+		<h1>@SeuNome</h1>
 
     <div class="links-container">
       {sortedLinks.map(link => (
@@ -40,29 +54,6 @@ const avatarPath = settings.avatar;
 </Layout>
 
 <style>
-  main {
-    margin: auto;
-    padding: 1rem;
-    width: 80vw;
-    max-width: 600px;
-    color: white;
-    font-size: 20px;
-    line-height: 1.6;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 3px solid white;
-    margin-bottom: 1rem;
-    object-fit: cover; /* Garante que a imagem preencha o círculo */
-  }
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-  }
+  /* O CSS permanece o mesmo */
+  main, .avatar, h1 { /* ... */ }
 </style>
