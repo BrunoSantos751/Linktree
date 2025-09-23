@@ -1,25 +1,31 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
+import settings from '../content/settings.json'; 
+import { Image } from 'astro:assets'; 
 
-// 1. Usar import.meta.glob, que é a forma moderna e não quebra se a pasta estiver vazia.
-// O 'eager: true' faz com que o conteúdo dos arquivos seja importado imediatamente.
 const allLinkFiles = await import.meta.glob('../content/links/*.json', { eager: true });
-
-// 2. Transformar o objeto retornado em um array de links.
-// Object.values pega apenas os conteúdos dos arquivos importados.
 const allLinks = Object.values(allLinkFiles);
-
-// 3. A lógica de ordenação e filtro continua a mesma.
 const sortedLinks = allLinks
   .filter(link => typeof link.order === 'number')
   .sort((a, b) => a.order - b.order);
+
+const avatarPath = settings.avatar;
 ---
 
 <Layout>
 	<main>
-    <img src="/avatar.png" alt="Foto de perfil" class="avatar">
-		<h1>@Brunosantos751</h1>
+    {avatarPath && (
+      <Image 
+        src={import(/* @vite-ignore */ `../assets/images/${avatarPath.split('/').pop()}`)}
+        alt="Foto de perfil" 
+        width={120} 
+        height={120} 
+        class="avatar" 
+      />
+    )}
+		
+		<h1>@SeuNome</h1>
 
     <div class="links-container">
       {sortedLinks.map(link => (
@@ -52,6 +58,7 @@ const sortedLinks = allLinks
     border-radius: 50%;
     border: 3px solid white;
     margin-bottom: 1rem;
+    object-fit: cover; /* Garante que a imagem preencha o círculo */
   }
   h1 {
     font-size: 2.5rem;
