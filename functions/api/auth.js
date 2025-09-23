@@ -1,13 +1,14 @@
-import { oauthHandler } from 'decap-cms-oauth-provider-node';
+export async function onRequest(context) {
+  const { env, request } = context;
 
-export default function handler(req, res) {
-  return oauthHandler(req, res, {
-    // ID e segredo do GitHub
-    client_id: process.env.GITHUB_CLIENT_ID,
-    client_secret: process.env.GITHUB_CLIENT_SECRET,
-    // URL de callback (a mesma cadastrada no GitHub)
-    redirect_uri: `https://linktree-214.pages.dev/api/auth/callback`,
-    // Domínios permitidos a acessar o CMS
-    allowedOrigins: ['https://linktree-214.pages.dev'],
-  });
+  // URL de callback
+  const redirectUri = `${new URL(request.url).origin}/api/auth/callback`;
+
+  // Construir URL de login do GitHub
+  const githubLoginUrl = new URL("https://github.com/login/oauth/authorize");
+  githubLoginUrl.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
+  githubLoginUrl.searchParams.set("redirect_uri", redirectUri);
+  githubLoginUrl.searchParams.set("scope", "repo,user:email");
+
+  return Response.redirect(githubLoginUrl.toString(), 302);
 }
