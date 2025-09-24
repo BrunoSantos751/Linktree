@@ -1,62 +1,132 @@
 ---
-import { client } from '../lib/sanity';
+import Layout from '../layouts/Layout.astro';
+import LinkButton from '../components/LinkButton.astro';
+import { createClient } from '@sanity/client';
+import { urlFor } from '../lib/sanityImage'; // Função auxiliar para gerar URLs de imagens do Sanity
 
-let title = "Meus Links";
-let description = "Meus links em um só lugar";
-let backgroundColor = "#13151a";
-let highlightColor = "#0077b6";
+// --- CONFIGURAÇÃO SANITY ---
+const client = createClient({
+  projectId: 'SEU_PROJECT_ID',
+  dataset: 'production',
+  apiVersion: '2025-09-24',
+  useCdn: true,
+});
 
-// Buscar configurações do Sanity
-const settings = await client.fetch(`*[_type == "settings"][0]{
-  title, description, backgroundColor, highlightColor
-}`);
+// --- BUSCA DO SETTINGS ---
+const settingsQuery = `*[_type == "settings"][0]{
+  title,
+  description,
+  backgroundColor,
+  highlightColor,
+  avatar
+}`;
+const settings = await client.fetch(settingsQuery);
 
-if (settings) {
-  title = settings.title || title;
-  description = settings.description || description;
-  backgroundColor = settings.backgroundColor || backgroundColor;
-  highlightColor = settings.highlightColor || highlightColor;
-}
+// --- LÓGICA DOS LINKS ---
+const linksQuery = `*[_type == "link"]{
+  _id,
+  title,
+  url,
+  order,
+  highlight
+}`;
+const allLinksData = await client.fetch(linksQuery);
+const sortedLinks = allLinksData
+  .filter(link => typeof link.order === 'number')
+  .sort((a, b) => a.order - b.order);
+
+// --- CONFIGURAÇÕES DE LAYOUT ---
+const title = settings?.title || "Meus Links";
+const description = settings?.description || "Meus links em um só lugar";
+const backgroundColor = settings?.backgroundColor || "#13151a";
+const highlightColor = settings?.highlightColor || "#0077b6";
+
+// --- AVATAR ---
+const avatarImage = settings?.avatar ? urlFor(settings.avatar).width(150).height(150).url() : null;
 ---
-<!doctype html>
-<html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
 
+<Layout>
+  <head>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={avatarImage || '/favicon.svg'} />
   </head>
-  <body>
-    <slot />
-  </body>
-</html>
+
+  <main>
+    {avatarImage && (
+      <img 
+        src={avatarImage} 
+        alt="Foto de perfil"
+        width="150"
+        height="150"
+        class="avatar"
+      />
+    )}
+
+    <h1>@SeuNome</h1>
+
+    <div class="links-container">
+      {sortedLinks.map(link => (
+        <LinkButton 
+          href={link.url}
+          title={link.title}
+          highlight={link.highlight}
+        />
+      ))}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 1rem;
+    width: 100%; 
+    max-width: 600px;
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .avatar {
+    width: 150px;   
+    height: 150px;  
+    border-radius: 50%;
+    border: 3px solid white;
+    margin-bottom: 1rem;
+    object-fit: cover;
+  }
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+  }
+  .links-container {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .avatar {
+      width: 130px;
+      height: 130px;
+    }
+  }
+</style>
 
 <style is:global define:vars={{ backgroundColor, highlightColor }}>
-  /* --- CSS RESET --- */
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-  html {
-    font-family: system-ui, sans-serif;
+  body {
     background-color: var(--backgroundColor);
   }
-
-  body {
-    margin: 0;
-    display: grid;
-    place-content: center; /* Centraliza horizontal e vertical */
-    min-height: 100vh;
-  }
-  /* --- FIM DO RESET --- */
-
   .is-highlighted {
     background-color: var(--highlightColor) !important;
     font-weight: bold;

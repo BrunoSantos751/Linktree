@@ -1,19 +1,35 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
-import settings from '../content/settings.json';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro:assets';
+import { createClient } from '@sanity/client';
+
+// --- CONFIGURAÇÃO SANITY ---
+const client = createClient({
+  projectId: 'SEU_PROJECT_ID',
+  dataset: 'production',
+  apiVersion: '2025-09-24',
+  useCdn: true,
+});
+
+// --- BUSCA DO SETTINGS ---
+const settingsQuery = `*[_type == "settings"][0]{
+  title,
+  description,
+  backgroundColor,
+  highlightColor,
+  avatar
+}`;
+const settings = await client.fetch(settingsQuery);
 
 // --- LÓGICA DO AVATAR ---
 const allImages = await import.meta.glob<{ default: ImageMetadata }>('../assets/images/*');
-const avatarPathFromCMS = settings.avatar;
 let avatarImage;
 
-if (avatarPathFromCMS) {
-  const avatarFilename = avatarPathFromCMS.split('/').pop();
+if (settings?.avatar) {
+  const avatarFilename = settings.avatar.split('/').pop();
   const imageKey = Object.keys(allImages).find(key => key.endsWith(avatarFilename));
-
   if (imageKey) {
     const imageModule = await allImages[imageKey]();
     avatarImage = imageModule.default;
@@ -21,20 +37,35 @@ if (avatarPathFromCMS) {
 }
 
 // --- LÓGICA DOS LINKS ---
-const allLinkFiles = await import.meta.glob('../content/links/*.json', { eager: true });
-const allLinks = Object.values(allLinkFiles);
-const sortedLinks = allLinks
+const linksQuery = `*[_type == "link"]{
+  _id,
+  title,
+  url,
+  order,
+  highlight
+}`;
+const allLinksData = await client.fetch(linksQuery);
+const sortedLinks = allLinksData
   .filter(link => typeof link.order === 'number')
   .sort((a, b) => a.order - b.order);
 
 // --- CONFIGURAÇÕES DE LAYOUT ---
-const title = settings.title || "Meus Links";
-const description = settings.description || "Meus links em um só lugar";
-const backgroundColor = settings.backgroundColor || "#13151a";
-const highlightColor = settings.highlightColor || "#0077b6";
+const title = settings?.title || "Meus Links";
+const description = settings?.description || "Meus links em um só lugar";
+const backgroundColor = settings?.backgroundColor || "#13151a";
+const highlightColor = settings?.highlightColor || "#0077b6";
 ---
 
 <Layout>
+  <head>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={avatarImage?.src || '/favicon.svg'} />
+  </head>
+
   <main>
     {avatarImage && (
       <Image 
