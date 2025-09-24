@@ -42,6 +42,7 @@ export async function onRequest(context) {
       headers: {
         Authorization: `token ${githubToken}`,
         Accept: "application/vnd.github.v3+json",
+        "User-Agent": "Linktree-Webhook", // <- Adicionado
       },
     });
 
@@ -63,6 +64,7 @@ export async function onRequest(context) {
       headers: {
         Authorization: `token ${githubToken}`,
         Accept: "application/vnd.github.v3+json",
+        "User-Agent": "Linktree-Webhook", // <- Adicionado
       },
       body: JSON.stringify({
         message: commitMessage,
