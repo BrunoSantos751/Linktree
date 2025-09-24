@@ -12,16 +12,19 @@ export async function onRequestPost({ request, env }) {
       return new Response("Variáveis do GitHub não configuradas", { status: 500 });
     }
 
-    // --- Função auxiliar para Base64 ---
+    const filename = `src/content/links/${payload.title}.json`;
+    const fileContent = JSON.stringify({
+      title: payload.title,
+      url: payload.url,
+      order: payload.order,
+      highlight: payload.highlight
+    }, null, 2);
+
     function base64Encode(str) {
       return btoa(unescape(encodeURIComponent(str)));
     }
 
-    // --- Identifica se é delete ---
-    const isDelete = request.headers.get("x-sanity-event") === "delete";
-    const filename = `src/content/links/${isDelete ? payload._id : payload.title}.json`;
-
-    // --- Verifica se o arquivo existe ---
+    // Primeiro, verifica se o arquivo existe
     const getResponse = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filename}?ref=${GITHUB_BRANCH}`,
       {
@@ -39,11 +42,11 @@ export async function onRequestPost({ request, env }) {
       console.log("Arquivo existe, SHA:", sha);
     }
 
-    // --- Deletar arquivo ---
-    if (isDelete) {
+    // Se o payload indicar deleção
+    if (payload._deleted) {
       if (!sha) {
-        console.log("Arquivo não existe, nada a deletar.");
-        return new Response("✅ Nada a deletar", { status: 200 });
+        console.log("Arquivo já não existe, nada a deletar.");
+        return new Response("✅ Arquivo já não existe", { status: 200 });
       }
 
       const deleteResponse = await fetch(
@@ -56,7 +59,7 @@ export async function onRequestPost({ request, env }) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            message: `Deleta link ${payload._id}`,
+            message: `Deleta link ${payload.title}`,
             branch: GITHUB_BRANCH,
             sha
           })
@@ -65,22 +68,15 @@ export async function onRequestPost({ request, env }) {
 
       const deleteData = await deleteResponse.json();
       if (!deleteResponse.ok) {
-        console.error("Erro ao deletar arquivo no GitHub:", deleteData);
+        console.error("Erro ao deletar no GitHub:", deleteData);
         return new Response(JSON.stringify(deleteData), { status: 500 });
       }
 
-      console.log(`Arquivo ${filename} deletado com sucesso!`);
-      return new Response("✅ Link deletado!", { status: 200 });
+      console.log("Arquivo deletado com sucesso:", deleteData.commit?.sha);
+      return new Response("✅ Arquivo deletado", { status: 200 });
     }
 
-    // --- Criar/Atualizar arquivo ---
-    const fileContent = JSON.stringify({
-      title: payload.title,
-      url: payload.url,
-      order: payload.order,
-      highlight: payload.highlight
-    }, null, 2);
-
+    // Se não for deleção → criar ou atualizar
     const commitResponse = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filename}`,
       {
