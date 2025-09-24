@@ -2,8 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
 import { client } from '../lib/sanity';
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro:assets';
 
 // --- Buscar configurações do Sanity ---
 const settings = await client.fetch(`
@@ -34,7 +32,7 @@ const sortedLinks = allLinks
       />
     )}
 
-    <h1>@SeuNome</h1>
+    <h1>@Brunosantos751</h1>
 
     <div class="links-container">
       {sortedLinks.map(link => (
