@@ -1,12 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
-import { getAvatarUrl, client } from '../lib/getAvatarUrl.js';
+import { client, getSanityImageUrl } from '../lib/sanityClient.js';
 
 // --- Buscar configurações do Sanity ---
-const settingsQuery = `*[_type == "settings"][0]{
-  title, description, backgroundColor, highlightColor, avatar
-}`;
+const settingsQuery = `*[_type == "settings"][0]{title, description, backgroundColor, highlightColor, avatar}`;
 const settings = await client.fetch(settingsQuery);
 
 const title = settings?.title || "Meus Links";
@@ -14,12 +12,10 @@ const description = settings?.description || "Meus links em um só lugar";
 const backgroundColor = settings?.backgroundColor || "#13151a";
 const highlightColor = settings?.highlightColor || "#0077b6";
 
-const avatarImage = getAvatarUrl(settings?.avatar);
+const avatarImage = getSanityImageUrl(settings?.avatar?.asset?._ref);
 
-// --- Buscar links do Sanity ---
-const linksQuery = `*[_type == "link"] | order(order asc) {
-  title, url, order, highlight
-}`;
+// --- Buscar links ---
+const linksQuery = `*[_type == "link"] | order(order asc) {title, url, order, highlight}`;
 const allLinks = await client.fetch(linksQuery);
 ---
 
@@ -44,45 +40,44 @@ const allLinks = await client.fetch(linksQuery);
 </Layout>
 
 <style>
-  main {
-    padding: 1rem;
-    width: 100%; 
-    max-width: 600px;
-    color: white;
-    font-size: 20px;
-    line-height: 1.6;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+/* mantém o CSS do seu design anterior */
+main {
+  padding: 1rem;
+  width: 100%; 
+  max-width: 600px;
+  color: white;
+  font-size: 20px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.avatar {
+  width: 150px;   
+  height: 150px;  
+  border-radius: 50%;
+  border: 3px solid white;
+  margin-bottom: 1rem;
+  object-fit: cover;
+}
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+.links-container {
+  width: 100%;
+  max-width: 400px;
+}
+@media (max-width: 640px) {
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
   }
   .avatar {
-    width: 150px;   
-    height: 150px;  
-    border-radius: 50%;
-    border: 3px solid white;
-    margin-bottom: 1rem;
-    object-fit: cover;
+    width: 130px;
+    height: 130px;
   }
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-  }
-  .links-container {
-    width: 100%;
-    max-width: 400px;
-  }
-
-  @media (max-width: 640px) {
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .avatar {
-      width: 130px;
-      height: 130px;
-    }
-  }
+}
 </style>
