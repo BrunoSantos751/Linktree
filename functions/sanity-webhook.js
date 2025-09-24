@@ -21,7 +21,7 @@ export async function onRequestPost({ request, env }) {
       highlight: payload.highlight || false,
     };
 
-    // 1️⃣ Tenta obter SHA se o arquivo já existe
+    // Tenta obter SHA se o arquivo já existe
     const getFileResp = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
       {
@@ -39,7 +39,7 @@ export async function onRequestPost({ request, env }) {
       sha = fileData.sha;
     }
 
-    // 2️⃣ Cria ou atualiza arquivo
+    // Cria ou atualiza arquivo
     const commitResp = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
       {
@@ -51,7 +51,7 @@ export async function onRequestPost({ request, env }) {
         },
         body: JSON.stringify({
           message: `Atualizando link ${payload.title}`,
-          content: Buffer.from(JSON.stringify(fileContent, null, 2)).toString("base64"),
+          content: btoa(JSON.stringify(fileContent, null, 2)), // <-- usa btoa
           branch,
           sha,
         }),
