@@ -12,7 +12,7 @@ export async function onRequestPost({ request, env }) {
       return new Response("Variáveis do GitHub não configuradas", { status: 500 });
     }
 
-    const filename = `src/content/links/${payload._id}.json`;
+    const filename = `src/content/links/${payload.title}.json`;
     const fileContent = JSON.stringify({
       title: payload.title,
       url: payload.url,
