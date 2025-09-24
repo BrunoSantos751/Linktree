@@ -1,17 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro:assets';
-import { createClient } from '@sanity/client';
-
-// --- CONFIGURAÇÃO SANITY ---
-const client = createClient({
-  projectId: 'SEU_PROJECT_ID',
-  dataset: 'production',
-  apiVersion: '2025-09-24',
-  useCdn: true,
-});
+import { client, urlFor } from '../lib/sanityImage';
 
 // --- BUSCA DO SETTINGS ---
 const settingsQuery = `*[_type == "settings"][0]{
@@ -23,20 +13,7 @@ const settingsQuery = `*[_type == "settings"][0]{
 }`;
 const settings = await client.fetch(settingsQuery);
 
-// --- LÓGICA DO AVATAR ---
-const allImages = await import.meta.glob<{ default: ImageMetadata }>('../assets/images/*');
-let avatarImage;
-
-if (settings?.avatar) {
-  const avatarFilename = settings.avatar.split('/').pop();
-  const imageKey = Object.keys(allImages).find(key => key.endsWith(avatarFilename));
-  if (imageKey) {
-    const imageModule = await allImages[imageKey]();
-    avatarImage = imageModule.default;
-  }
-}
-
-// --- LÓGICA DOS LINKS ---
+// --- BUSCA DOS LINKS ---
 const linksQuery = `*[_type == "link"]{
   _id,
   title,
@@ -54,6 +31,9 @@ const title = settings?.title || "Meus Links";
 const description = settings?.description || "Meus links em um só lugar";
 const backgroundColor = settings?.backgroundColor || "#13151a";
 const highlightColor = settings?.highlightColor || "#0077b6";
+
+// --- AVATAR ---
+const avatarImage = settings?.avatar ? urlFor(settings.avatar).width(150).height(150).url() : null;
 ---
 
 <Layout>
@@ -63,15 +43,20 @@ const highlightColor = settings?.highlightColor || "#0077b6";
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content={avatarImage?.src || '/favicon.svg'} />
+    <meta property="og:image" content={avatarImage || '/favicon.svg'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={avatarImage || '/favicon.svg'} />
   </head>
 
   <main>
     {avatarImage && (
-      <Image 
-        src={avatarImage}
+      <img 
+        src={avatarImage} 
         alt="Foto de perfil"
-        width={150} height={150}
+        width="150"
+        height="150"
         class="avatar"
       />
     )}
@@ -126,10 +111,22 @@ const highlightColor = settings?.highlightColor || "#0077b6";
       font-size: 2rem;
       margin-bottom: 1.5rem;
     }
-
     .avatar {
       width: 130px;
       height: 130px;
     }
+  }
+</style>
+
+<style is:global define:vars={{ backgroundColor, highlightColor }}>
+  body {
+    background-color: var(--backgroundColor);
+  }
+  .is-highlighted {
+    background-color: var(--highlightColor) !important;
+    font-weight: bold;
+  }
+  .is-highlighted:hover {
+    filter: brightness(1.1);
   }
 </style>
