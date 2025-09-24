@@ -1,100 +1,71 @@
 // /functions/sanity-webhook.js
-export async function onRequest(context) {
-  const { request, env } = context;
 
-  if (request.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
-  }
-
-  let payload;
+export async function onRequestPost({ request }) {
   try {
-    payload = await request.json();
+    const payload = await request.json();
     console.log("Payload recebido:", payload);
-  } catch (err) {
-    console.error("Erro ao ler JSON:", err);
-    return new Response("Invalid JSON", { status: 400 });
-  }
 
-  const requiredFields = ["_id", "title", "url", "order", "highlight"];
-  for (const field of requiredFields) {
-    if (!(field in payload)) {
-      return new Response(`Campo faltando: ${field}`, { status: 400 });
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const branch = process.env.GITHUB_BRANCH;
+
+    if (!token || !owner || !repo || !branch) {
+      return new Response("Missing GitHub secrets", { status: 500 });
     }
-  }
 
-  const fileName = `${payload._id}.json`;
-  const fileContent = JSON.stringify(payload, null, 2);
+    const filePath = `src/content/links/${payload._id}.json`;
 
-  const githubOwner = env.GITHUB_OWNER;
-  const githubRepo = env.GITHUB_REPO;
-  const githubBranch = env.GITHUB_BRANCH || "main";
-  const githubToken = env.GITHUB_TOKEN;
+    // Dados do link
+    const fileContent = {
+      title: payload.title,
+      url: payload.url,
+      order: payload.order,
+      highlight: payload.highlight || false,
+    };
 
-  if (!githubOwner || !githubRepo || !githubToken) {
-    return new Response("Secrets GitHub não configurados", { status: 500 });
-  }
-
-  const apiUrl = `https://api.github.com/repos/${githubOwner}/${githubRepo}/contents/src/content/links/${fileName}`;
-
-  try {
-    // Verifica se o arquivo já existe para pegar o SHA
-    const getRes = await fetch(apiUrl + `?ref=${githubBranch}`, {
+    // 1️⃣ Pega o SHA do arquivo (se já existir)
+    const getFileResp = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
       headers: {
-        Authorization: `token ${githubToken}`,
-        Accept: "application/vnd.github.v3+json",
-        "User-Agent": "Linktree-Webhook", // <- Adicionado
+        Authorization: `token ${token}`,
+        "User-Agent": "SanityWebhook",
+        Accept: "application/vnd.github+json",
       },
     });
 
-    let sha;
-    if (getRes.status === 200) {
-      const data = await getRes.json();
-      sha = data.sha;
-      console.log("Arquivo existente, SHA:", sha);
-    } else {
-      console.log("Arquivo não existe, será criado. Status GET:", getRes.status);
+    let sha = null;
+    if (getFileResp.status === 200) {
+      const fileData = await getFileResp.json();
+      sha = fileData.sha;
     }
 
-    const commitMessage = sha
-      ? `Atualizando link: ${payload.title}`
-      : `Adicionando link: ${payload.title}`;
-
-    const putRes = await fetch(apiUrl, {
+    // 2️⃣ Cria ou atualiza o arquivo no GitHub
+    const commitResp = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
       method: "PUT",
       headers: {
-        Authorization: `token ${githubToken}`,
-        Accept: "application/vnd.github.v3+json",
-        "User-Agent": "Linktree-Webhook", // <- Adicionado
+        Authorization: `token ${token}`,
+        "User-Agent": "SanityWebhook",
+        Accept: "application/vnd.github+json",
       },
       body: JSON.stringify({
-        message: commitMessage,
-        content: btoa(fileContent),
-        branch: githubBranch,
-        sha,
+        message: `Atualizando link ${payload.title}`,
+        content: Buffer.from(JSON.stringify(fileContent, null, 2)).toString("base64"),
+        branch,
+        sha, // se existir, atualiza; se não, cria novo
       }),
     });
 
-    // Trata resposta de forma segura
-    const putDataText = await putRes.text();
-    console.log("Resposta GitHub bruta:", putDataText);
+    const commitResult = await commitResp.json();
+    console.log("Resultado do commit:", commitResult);
 
-    let putData;
-    try {
-      putData = JSON.parse(putDataText);
-    } catch (err) {
-      console.error("Não foi possível parsear JSON:", err);
-      return new Response("Erro ao comunicar com GitHub: " + putDataText, { status: 500 });
+    if (!commitResp.ok) {
+      console.error("Erro ao comunicar com GitHub:", commitResult);
+      return new Response("Erro ao salvar no GitHub", { status: 500 });
     }
 
-    if (!putRes.ok) {
-      console.error("Erro GitHub:", putData);
-      return new Response("Erro GitHub: " + JSON.stringify(putData), { status: 500 });
-    }
-
-    console.log("✅ Commit enviado com sucesso!", putData.content.path);
-    return new Response("✅ Commit enviado com sucesso!", { status: 200 });
+    return new Response("✅ Link salvo no GitHub e pronto para deploy!", { status: 200 });
   } catch (err) {
-    console.error("Erro ao comunicar com GitHub:", err);
+    console.error("Erro interno:", err);
     return new Response("Erro interno", { status: 500 });
   }
 }
