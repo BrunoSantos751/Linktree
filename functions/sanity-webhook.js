@@ -1,5 +1,5 @@
 // functions/sanity-webhook.js
-export async function onRequestPost({ request }) {
+export async function onRequestPost({ request, env }) {
   try {
     // 1️⃣ Recebe o payload do Sanity
     const payload = await request.json();
