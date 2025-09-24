@@ -1,38 +1,65 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LinkButton from '../components/LinkButton.astro';
-import { client, getSanityImageUrl } from '../lib/sanityClient.js';
+import type { ImageMetadata } from 'astro:assets';
+import { Image } from 'astro:assets';
+import settings from '../content/settings.json';
 
-// --- Buscar configurações do Sanity ---
-const settingsQuery = `*[_type == "settings"][0]{title, description, backgroundColor, highlightColor, avatar}`;
-const settings = await client.fetch(settingsQuery);
+// --- LÓGICA DO AVATAR ---
+const allImages = await import.meta.glob<{ default: ImageMetadata }>('../assets/images/*');
+let avatarImage;
+if (settings.avatar) {
+  const avatarFilename = settings.avatar.split('/').pop();
+  const imageKey = Object.keys(allImages).find(key => key.endsWith(avatarFilename));
+  if (imageKey) {
+    const imageModule = await allImages[imageKey]();
+    avatarImage = imageModule.default;
+  }
+}
 
-const title = settings?.title || "Meus Links";
-const description = settings?.description || "Meus links em um só lugar";
-const backgroundColor = settings?.backgroundColor || "#13151a";
-const highlightColor = settings?.highlightColor || "#0077b6";
+// --- LÓGICA DOS LINKS ---
+const allLinkFiles = await import.meta.glob('../content/links/*.json', { eager: true });
+const allLinks = Object.values(allLinkFiles);
+const sortedLinks = allLinks
+  .filter(link => typeof link.order === 'number')
+  .sort((a, b) => a.order - b.order);
 
-const avatarImage = getSanityImageUrl(settings?.avatar?.asset?._ref);
-
-// --- Buscar links ---
-const linksQuery = `*[_type == "link"] | order(order asc) {title, url, order, highlight}`;
-const allLinks = await client.fetch(linksQuery);
+// --- CONFIGURAÇÕES DE LAYOUT ---
+const title = settings.title || "Meus Links";
+const description = settings.description || "Meus links em um só lugar";
+const backgroundColor = settings.backgroundColor || "#13151a";
+const highlightColor = settings.highlightColor || "#0077b6";
 ---
 
+<!-- SEO -->
+<head>
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+</head>
+
 <Layout>
-  <main>
+  <main style={`background-color:${backgroundColor}`}>
     {avatarImage && (
-      <img src={avatarImage} alt="Foto de perfil" class="avatar" />
+      <Image 
+        src={avatarImage}
+        alt="Avatar"
+        width={150} height={150}
+        class="avatar"
+      />
     )}
 
-    <h1>@SeuNome</h1>
+    <h1>@Brunosantos751</h1>
 
     <div class="links-container">
-      {allLinks.map(link => (
+      {sortedLinks.map(link => (
         <LinkButton 
           href={link.url}
           title={link.title}
           highlight={link.highlight}
+          style={link.highlight ? `background-color:${highlightColor}` : ''}
         />
       ))}
     </div>
@@ -40,43 +67,51 @@ const allLinks = await client.fetch(linksQuery);
 </Layout>
 
 <style>
-main {
-  padding: 1rem;
-  width: 100%; 
-  max-width: 600px;
-  color: white;
-  font-size: 20px;
-  line-height: 1.6;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-.avatar {
-  width: 150px;   
-  height: 150px;  
-  border-radius: 50%;
-  border: 3px solid white;
-  margin-bottom: 1rem;
-  object-fit: cover;
-}
-h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-}
-.links-container {
-  width: 100%;
-  max-width: 400px;
-}
-@media (max-width: 640px) {
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
+  main {
+    padding: 1rem;
+    width: 100%; 
+    max-width: 600px;
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
+
   .avatar {
-    width: 130px;
-    height: 130px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid white;
+    margin-bottom: 1rem;
+    object-fit: cover;
   }
-}
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+  }
+
+  .links-container {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .avatar {
+      width: 130px;
+      height: 130px;
+    }
+  }
 </style>
