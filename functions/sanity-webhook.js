@@ -29,6 +29,10 @@ export async function onRequest(context) {
   const githubRepo = env.GITHUB_REPO;
   const githubBranch = env.GITHUB_BRANCH || "main";
   const githubToken = env.GITHUB_TOKEN;
+  console.log("GITHUB_OWNER:", githubOwner);
+  console.log("GITHUB_REPO:", githubRepo);
+  console.log("GITHUB_BRANCH:", githubBranch);
+  console.log("GITHUB_TOKEN presente?", !!githubToken);
 
   if (!githubOwner || !githubRepo || !githubToken) {
     return new Response("Secrets GitHub não configurados", { status: 500 });
@@ -82,6 +86,7 @@ export async function onRequest(context) {
     return new Response("✅ Commit enviado com sucesso!", { status: 200 });
   } catch (err) {
     console.error("Erro ao comunicar com GitHub:", err);
+    
     return new Response("Erro interno", { status: 500 });
   }
 }

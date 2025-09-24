@@ -5,9 +5,9 @@ const WORKER_URL = "https://linktree-214.pages.dev/sanity-webhook/";
 
 // Payload de teste
 const payload = {
-  _id: "teste123",
-  title: "Link de Teste",
-  url: "https://example.com",
+  _id: "teste12313123",
+  title: "Link de Teste123123",
+  url: "https://example4241242.com",
   order: 1,
   highlight: true
 };
