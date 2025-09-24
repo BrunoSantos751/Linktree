@@ -1,12 +1,12 @@
-export async function onRequestPost({ request }) {
+export async function onRequestPost({ request, env }) {
   try {
     const payload = await request.json();
     console.log("Payload recebido:", payload);
 
-    const GITHUB_TOKEN = GITHUB_TOKEN; // definir como Secret no Cloudflare
-    const GITHUB_OWNER = GITHUB_OWNER;
-    const GITHUB_REPO = GITHUB_REPO;
-    const GITHUB_BRANCH = GITHUB_BRANCH || 'main';
+    const GITHUB_TOKEN = env.GITHUB_TOKEN; // definir como Secret no Cloudflare
+    const GITHUB_OWNER = env.GITHUB_OWNER;
+    const GITHUB_REPO = env.GITHUB_REPO;
+    const GITHUB_BRANCH = env.GITHUB_BRANCH || 'main';
 
     if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
       return new Response("Variáveis do GitHub não configuradas", { status: 500 });
