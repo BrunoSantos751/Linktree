@@ -1,20 +1,17 @@
-// functions/sanity-webhook.js
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request }) {
   try {
-    // 1️⃣ Recebe o payload do Sanity
     const payload = await request.json();
     console.log("Payload recebido:", payload);
 
-    const GITHUB_TOKEN = env.GITHUB_TOKEN;
-    const GITHUB_OWNER = env.GITHUB_OWNER;
-    const GITHUB_REPO = env.GITHUB_REPO;
-    const GITHUB_BRANCH = env.GITHUB_BRANCH || 'main';
+    const GITHUB_TOKEN = GITHUB_TOKEN; // definir como Secret no Cloudflare
+    const GITHUB_OWNER = GITHUB_OWNER;
+    const GITHUB_REPO = GITHUB_REPO;
+    const GITHUB_BRANCH = GITHUB_BRANCH || 'main';
 
     if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
       return new Response("Variáveis do GitHub não configuradas", { status: 500 });
     }
 
-    // 2️⃣ Monta o nome do arquivo JSON a partir do ID do link
     const filename = `links/${payload._id}.json`;
     const fileContent = JSON.stringify({
       title: payload.title,
@@ -23,7 +20,12 @@ export async function onRequestPost({ request, env }) {
       highlight: payload.highlight
     }, null, 2);
 
-    // 3️⃣ Busca o SHA do arquivo se existir
+    // função para converter string em Base64 compatível com Cloudflare
+    function base64Encode(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
+    // Verifica se o arquivo existe
     const getResponse = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filename}?ref=${GITHUB_BRANCH}`,
       {
@@ -37,11 +39,10 @@ export async function onRequestPost({ request, env }) {
     let sha;
     if (getResponse.status === 200) {
       const data = await getResponse.json();
-      sha = data.sha; // arquivo existe, usamos o SHA para atualizar
+      sha = data.sha;
       console.log("Arquivo existe, SHA:", sha);
     }
 
-    // 4️⃣ Cria ou atualiza o arquivo
     const commitResponse = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filename}`,
       {
@@ -53,7 +54,7 @@ export async function onRequestPost({ request, env }) {
         },
         body: JSON.stringify({
           message: sha ? `Atualiza link ${payload.title}` : `Adiciona link ${payload.title}`,
-          content: btoa(unescape(encodeURIComponent(fileContent))),
+          content: base64Encode(fileContent),
           branch: GITHUB_BRANCH,
           sha
         })
@@ -73,9 +74,4 @@ export async function onRequestPost({ request, env }) {
     console.error("Erro interno:", err);
     return new Response(`Erro interno: ${err.message}`, { status: 500 });
   }
-}
-
-// Função btoa compatível com Cloudflare
-function btoa(str) {
-  return Buffer.from(str, 'utf-8').toString('base64');
 }
