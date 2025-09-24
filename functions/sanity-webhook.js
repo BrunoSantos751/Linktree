@@ -43,6 +43,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     // Se o payload indicar deleção
+    console.log("Payload _deleted:", payload._deleted);
     if (payload._deleted) {
       if (!sha) {
         console.log("Arquivo já não existe, nada a deletar.");
