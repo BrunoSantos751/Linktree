@@ -29,10 +29,6 @@ export async function onRequest(context) {
   const githubRepo = env.GITHUB_REPO;
   const githubBranch = env.GITHUB_BRANCH || "main";
   const githubToken = env.GITHUB_TOKEN;
-  console.log("GITHUB_OWNER:", githubOwner);
-  console.log("GITHUB_REPO:", githubRepo);
-  console.log("GITHUB_BRANCH:", githubBranch);
-  console.log("GITHUB_TOKEN presente?", !!githubToken);
 
   if (!githubOwner || !githubRepo || !githubToken) {
     return new Response("Secrets GitHub não configurados", { status: 500 });
@@ -55,7 +51,7 @@ export async function onRequest(context) {
       sha = data.sha;
       console.log("Arquivo existente, SHA:", sha);
     } else {
-      console.log("Arquivo não existe, será criado.");
+      console.log("Arquivo não existe, será criado. Status GET:", getRes.status);
     }
 
     const commitMessage = sha
@@ -76,9 +72,20 @@ export async function onRequest(context) {
       }),
     });
 
-    const putData = await putRes.json();
+    // Trata resposta de forma segura
+    const putDataText = await putRes.text();
+    console.log("Resposta GitHub bruta:", putDataText);
+
+    let putData;
+    try {
+      putData = JSON.parse(putDataText);
+    } catch (err) {
+      console.error("Não foi possível parsear JSON:", err);
+      return new Response("Erro ao comunicar com GitHub: " + putDataText, { status: 500 });
+    }
+
     if (!putRes.ok) {
-      console.error("Erro ao criar/atualizar arquivo no GitHub:", putData);
+      console.error("Erro GitHub:", putData);
       return new Response("Erro GitHub: " + JSON.stringify(putData), { status: 500 });
     }
 
@@ -86,7 +93,6 @@ export async function onRequest(context) {
     return new Response("✅ Commit enviado com sucesso!", { status: 200 });
   } catch (err) {
     console.error("Erro ao comunicar com GitHub:", err);
-    
     return new Response("Erro interno", { status: 500 });
   }
 }
