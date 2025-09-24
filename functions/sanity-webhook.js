@@ -1,74 +1,81 @@
-export async function onRequestPost({ request, env }) {
+// functions/sanity-webhook.js
+export async function onRequestPost({ request }) {
   try {
+    // 1️⃣ Recebe o payload do Sanity
     const payload = await request.json();
     console.log("Payload recebido:", payload);
 
-    const token = env.GITHUB_TOKEN;
-    const owner = env.GITHUB_OWNER;
-    const repo = env.GITHUB_REPO;
-    const branch = env.GITHUB_BRANCH;
+    const GITHUB_TOKEN = env.GITHUB_TOKEN;
+    const GITHUB_OWNER = env.GITHUB_OWNER;
+    const GITHUB_REPO = env.GITHUB_REPO;
+    const GITHUB_BRANCH = env.GITHUB_BRANCH || 'main';
 
-    if (!token || !owner || !repo || !branch) {
-      return new Response("Missing GitHub secrets", { status: 500 });
+    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+      return new Response("Variáveis do GitHub não configuradas", { status: 500 });
     }
 
-    const filePath = `src/content/links/${payload._id}.json`;
-
-    const fileContent = {
+    // 2️⃣ Monta o nome do arquivo JSON a partir do ID do link
+    const filename = `links/${payload._id}.json`;
+    const fileContent = JSON.stringify({
       title: payload.title,
       url: payload.url,
       order: payload.order,
-      highlight: payload.highlight || false,
-    };
+      highlight: payload.highlight
+    }, null, 2);
 
-    // Tenta obter SHA se o arquivo já existe
-    const getFileResp = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
+    // 3️⃣ Busca o SHA do arquivo se existir
+    const getResponse = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filename}?ref=${GITHUB_BRANCH}`,
       {
         headers: {
-          Authorization: `token ${token}`,
-          "User-Agent": "SanityWebhook",
-          Accept: "application/vnd.github+json",
-        },
+          Authorization: `token ${GITHUB_TOKEN}`,
+          "User-Agent": "sanity-webhook"
+        }
       }
     );
 
-    let sha = null;
-    if (getFileResp.status === 200) {
-      const fileData = await getFileResp.json();
-      sha = fileData.sha;
+    let sha;
+    if (getResponse.status === 200) {
+      const data = await getResponse.json();
+      sha = data.sha; // arquivo existe, usamos o SHA para atualizar
+      console.log("Arquivo existe, SHA:", sha);
     }
 
-    // Cria ou atualiza arquivo
-    const commitResp = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+    // 4️⃣ Cria ou atualiza o arquivo
+    const commitResponse = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filename}`,
       {
         method: "PUT",
         headers: {
-          Authorization: `token ${token}`,
-          "User-Agent": "SanityWebhook",
-          Accept: "application/vnd.github+json",
+          Authorization: `token ${GITHUB_TOKEN}`,
+          "User-Agent": "sanity-webhook",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          message: `Atualizando link ${payload.title}`,
-          content: btoa(JSON.stringify(fileContent, null, 2)), // <-- usa btoa
-          branch,
-          sha,
-        }),
+          message: sha ? `Atualiza link ${payload.title}` : `Adiciona link ${payload.title}`,
+          content: btoa(unescape(encodeURIComponent(fileContent))),
+          branch: GITHUB_BRANCH,
+          sha
+        })
       }
     );
 
-    const commitResult = await commitResp.json();
-    console.log("Resultado do commit:", commitResult);
-
-    if (!commitResp.ok) {
-      console.error("Erro ao comunicar com GitHub:", commitResult);
-      return new Response("Erro ao salvar no GitHub", { status: 500 });
+    const commitData = await commitResponse.json();
+    if (!commitResponse.ok) {
+      console.error("Erro ao comunicar com GitHub:", commitData);
+      return new Response(JSON.stringify(commitData), { status: 500 });
     }
 
-    return new Response("✅ Link salvo no GitHub e pronto para deploy!", { status: 200 });
+    console.log("Commit realizado com sucesso:", commitData.commit?.sha);
+
+    return new Response("✅ Payload recebido e commit concluído!", { status: 200 });
   } catch (err) {
     console.error("Erro interno:", err);
-    return new Response("Erro interno", { status: 500 });
+    return new Response(`Erro interno: ${err.message}`, { status: 500 });
   }
+}
+
+// Função btoa compatível com Cloudflare
+function btoa(str) {
+  return Buffer.from(str, 'utf-8').toString('base64');
 }
