@@ -17,7 +17,8 @@ export async function onRequestPost({ request, env }) {
       title: payload.title,
       url: payload.url,
       order: payload.order,
-      highlight: payload.highlight
+      highlight: payload.highlight,
+      iconUrl: payload.icon
     }, null, 2);
 
     function base64Encode(str) {

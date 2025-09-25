@@ -5,8 +5,9 @@ export default {
   fields: [
     { name: 'order', title: 'Ordem', type: 'number' },
     { name: 'title', title: 'Título do Botão', type: 'string' },
-    { name: 'url', title: 'URL do Link', type: 'url' },
-    { name: 'highlight', title: 'Link em Destaque?', type: 'boolean' }
+    { name: 'url', title: 'URL do Link', type: 'string' },
+    { name: 'highlight', title: 'Link em Destaque?', type: 'boolean' },
+    { name: 'icon', title: 'Icone', type: 'image' },
   ],
   orderings: [
     {
@@ -14,5 +15,5 @@ export default {
       name: 'orderAsc',
       by: [{ field: 'order', direction: 'asc' }]
     }
-  ]0000
+  ]
 }

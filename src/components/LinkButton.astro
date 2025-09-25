@@ -1,17 +1,17 @@
 ---
-const { href, title, highlight = false } = Astro.props;
+const { href, title, highlight, iconUrl } = Astro.props;
 ---
-<a 
-  href={href} 
-  target="_blank" 
+
+<a
+  href={href}
+  class={`link-button ${highlight ? "highlight" : ""}`}
+  target="_blank"
   rel="noopener noreferrer"
-  class:list={[
-    "link-button",
-    { "is-highlighted": highlight }
-  ]}
 >
-  {title}
+  {iconUrl && <img src={iconUrl} alt="" class="icon" />}
+  <span>{title}</span>
 </a>
+
 
 <style>
   .link-button {
@@ -37,5 +37,11 @@ const { href, title, highlight = false } = Astro.props;
   /* A cor específica do .is-highlighted agora vem do Layout.astro */
   .is-highlighted:hover {
     background-color: #0288d1; /* Pode remover ou manter como fallback */
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
   }
 </style>
