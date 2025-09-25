@@ -14,34 +14,43 @@ const { href, title, highlight, iconUrl } = Astro.props;
 
 
 <style>
-  .link-button {
-    display: block;
-    background-color: #333;
-    color: white;
-    text-decoration: none;
-    padding: 1rem;
-    margin: 0.75rem auto;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-  }
+.link-button {
+  position: relative; /* permite posicionar o ícone */
+  display: flex;
+  justify-content: center; /* centraliza o texto */
+  align-items: center;
+  background-color: #333;
+  color: white;
+  text-decoration: none;
+  padding: 1rem;
+  margin: 0.75rem auto;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  text-align: center;
+}
 
-  .link-button:hover {
-    transform: scale(1.05);
-    background-color: #555;
-  }
+.link-button:hover {
+  transform: scale(1.05);
+  background-color: #555;
+}
 
-  /* A cor específica do .is-highlighted agora vem do Layout.astro */
-  .is-highlighted:hover {
-    background-color: #0288d1; /* Pode remover ou manter como fallback */
-  }
+.is-highlighted:hover {
+  background-color: #0288d1; /* fallback */
+}
 
-  .icon {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-  }
+.icon {
+  position: absolute;
+  left: 1rem; /* encosta na esquerda */
+  width: 32px;   /* antes era 24px */
+  height: 32px;  /* antes era 24px */
+  object-fit: contain;
+}
+
+.link-text {
+  flex: 1;
+}
+
 </style>
