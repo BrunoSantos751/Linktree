@@ -2,5 +2,6 @@
   "title": "Auwalk",
   "url": "https://auwalk.pages.dev/",
   "order": 3,
-  "highlight": true
+  "highlight": true,
+  "iconUrl": "https://cdn.sanity.io/images/et01yfkf/production/ab3498c4357659d8e3dbb37d33e78ac4af2a827c-1024x1024.webp"
 }
