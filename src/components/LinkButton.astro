@@ -1,12 +1,15 @@
 ---
-const { href, title, highlight, iconUrl } = Astro.props;
+const { href, title, highlight = false, iconUrl } = Astro.props;
 ---
 
-<a
-  href={href}
-  class={`link-button ${highlight ? "highlight" : ""}`}
-  target="_blank"
+<a 
+  href={href} 
+  target="_blank" 
   rel="noopener noreferrer"
+  class:list={[
+    "link-button",
+    { "is-highlighted": highlight }
+  ]}
 >
   {iconUrl && <img src={iconUrl} alt="" class="icon" />}
   <span>{title}</span>
