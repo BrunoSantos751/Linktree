@@ -1,46 +1,55 @@
-# Astro Starter Kit: Basics
+# 🌐 Linktree Astro + Sanity
 
-```sh
-npm create astro@latest -- --template basics
-```
+Um clone personalizado do **Linktree** feito com **Astro**, consumindo dados do **Sanity CMS**. Permite criar botões com links, ícones, destaque e avatar de perfil, totalmente configurável via CMS.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+---
 
-## 🚀 Project Structure
+## 📝 Funcionalidades
 
-Inside of your Astro project, you'll see the following folders and files:
+| Funcionalidade | Descrição |
+|----------------|-----------|
+| Avatar | Exibe avatar do usuário carregado do Sanity |
+| Botões | Nome centralizado, ícone opcional à esquerda, destaque visual |
+| Personalização | Configuração de título, descrição, cores de fundo e destaque via CMS |
+| Links múltiplos | Suporte a vários links organizados por ordem |
+| Deploy | Deploy simplificado em Vercel ou outro host estático |
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+---
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## ⚙️ Tecnologias
 
-## 🧞 Commands
+- [Astro](https://astro.build/)
+- [Sanity CMS](https://www.sanity.io/)
+- JavaScript/TypeScript
+- CSS para estilização responsiva
+- Deploy contínuo via **Vercel**
 
-All commands are run from the root of the project, from a terminal:
+---
+### Webhook:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+- Cria/atualiza `.json` de cada link em `src/content/links/`.
+- Permite deletar links quando removidos no Sanity.
+- Atualiza os settings (título, descrição, cores, avatar).
 
-## 👀 Want to learn more?
+## 🚀 Rodando Localmente
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+1. Instale dependências:
+
+npm install
+
+  Crie arquivo .env com variáveis do Sanity e GitHub:
+
+SANITY_PROJECT_ID=seu_project_id
+SANITY_DATASET=production
+GITHUB_TOKEN=seu_token
+GITHUB_OWNER=usuario
+GITHUB_REPO=repo
+GITHUB_BRANCH=main
+
+  Rodar o app em dev:
+
+npm run dev
+
+  Build para produção:
+
+npm run build
