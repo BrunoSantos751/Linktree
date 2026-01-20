@@ -1,4 +1,4 @@
-# 🌐 Linktree Astro + Sanity
+# 🌐 Linktree
 
 Um clone personalizado do **Linktree** feito com **Astro**, consumindo dados do **Sanity CMS**. Permite criar botões com links, ícones, destaque e avatar de perfil, totalmente configurável via CMS.
 
